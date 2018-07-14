@@ -1,0 +1,9 @@
+Diorite Commons
+Copyright 2016-2018 Bartłomiej Mazur
+
+This product includes code developed at
+The Apache Software Foundation (http://www.apache.org/)
+List of source files containing such code:
+- org/diorite/commons/StringUtils.java
+- org/diorite/commons/CharSequenceUtils.java
+- org/diorite/commons/reflect/ApacheTypeUtils.java

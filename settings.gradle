@@ -1,0 +1,7 @@
+rootProject.name = 'commons'
+
+include 'commons-base'
+include 'commons-math'
+include 'commons-extra'
+include 'commons-reflections-extra'
+include 'commons-all'
