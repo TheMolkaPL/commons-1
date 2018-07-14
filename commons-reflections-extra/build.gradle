@@ -1,0 +1,6 @@
+dependencies {
+    compile group: group, name: 'commons-base', version: version
+    compile group: group, name: 'commons-extra', version: version
+
+    compile group: 'org.ow2.asm', name: 'asm', version: asm
+}

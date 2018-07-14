@@ -1,0 +1,104 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2017. Diorite (by Bartłomiej Mazur (aka GotoFinal))
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package org.diorite.commons.reflect.type;
+
+import org.diorite.commons.object.Builder;
+
+import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.LinkedBlockingDeque;
+
+public class TypeParserBuilder implements Builder<TypeParser> {
+    private final Deque<ClassLoader> classLoaders = new LinkedBlockingDeque<>();
+    private       boolean            cached;
+    private final Deque<String>      imports      = new LinkedBlockingDeque<>();
+    @Nullable
+    private       TypeParser         parent;
+
+    TypeParserBuilder() {
+        this.imports.add("java.lang");
+        this.imports.add("java.util");
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        if (contextClassLoader != null) {
+            this.classLoaders.add(contextClassLoader);
+        }
+        this.classLoaders.add(ClassLoader.getSystemClassLoader());
+    }
+
+    public TypeParserBuilder withClassLoaders(ClassLoader... classLoaders) {
+        Set<ClassLoader> classLoaderSet = new LinkedHashSet<>(Arrays.asList(classLoaders));
+        this.classLoaders.clear();
+        this.classLoaders.addAll(classLoaderSet);
+        return this;
+    }
+
+    public TypeParserBuilder appendClassLoaders(ClassLoader... classLoaders) {
+        Set<ClassLoader> classLoaderSet = new LinkedHashSet<>(Arrays.asList(classLoaders));
+        this.classLoaders.removeAll(classLoaderSet);
+        this.classLoaders.addAll(classLoaderSet);
+        return this;
+    }
+
+    public TypeParserBuilder prependClassLoaders(ClassLoader... classLoaders) {
+        Set<ClassLoader> classLoaderSet = new LinkedHashSet<>(Arrays.asList(classLoaders));
+        this.classLoaders.removeAll(classLoaderSet);
+        for (ClassLoader classLoader: classLoaders) {
+            this.classLoaders.addFirst(classLoader);
+        }
+        return this;
+    }
+
+    public TypeParserBuilder setImports(String... imports) {
+        Set<String> importsSet = new LinkedHashSet<>(Arrays.asList(imports));
+        this.imports.clear();
+        this.imports.addAll(importsSet);
+        return this;
+    }
+
+    public TypeParserBuilder importPackages(String... imports) {
+        Set<String> importsSet = new LinkedHashSet<>(Arrays.asList(imports));
+        this.imports.removeAll(importsSet);
+        this.imports.addAll(importsSet);
+        return this;
+    }
+
+    public TypeParserBuilder cached() {
+        this.cached = true;
+        return this;
+    }
+
+    public TypeParserBuilder withParent(TypeParser parent) {
+        this.parent = parent;
+        return this;
+    }
+
+    @Override
+    public TypeParser build() {
+        return new TypeParser(this.classLoaders, this.cached, this.imports, this.parent);
+    }
+}
